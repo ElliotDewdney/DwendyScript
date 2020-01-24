@@ -24,6 +24,12 @@ public class SimpleReversePolish {
 
     public static class Pipe {
         private Queue<Double> tempStorage = new ArrayDeque<>();
+        private Queue<String> inputs;
+
+        private Pipe withInputs(Queue<String> inputs){
+            this.inputs = inputs;
+            return this;
+        }
 
         public Pipe(DoubleInput DIn, DoubleOutput DOut){
             DoubleOut = DOut;
@@ -65,7 +71,7 @@ public class SimpleReversePolish {
         int getInputs();
     }
 
-    private void initializeOperations(Queue<String> inputs, boolean Debug, double answer){
+    private void initializeOperations(boolean Debug, double answer){
         for(Operations Op : Operations.values())for(String Sy : Op.Symbol)Operation.put(Sy,Op);
         
         Operation.put("ANS", new Routine() {
@@ -85,11 +91,11 @@ public class SimpleReversePolish {
         Operation.put("(", new Routine() {
             @Override
             public double[] Evaluate(Pipe pipe, double[] arr) {
-                if(Debug) pipe.Message.Push("Starting IF Statement with value : " + doubleStack.pop());
+                if(Debug) pipe.Message.Push("Starting IF Statement with value : " + arr[0]);
                 if(arr[0] != 0 ){
                     int brackets = 1;
                     while(brackets > 0){
-                        String data = inputs.poll();
+                        String data = pipe.inputs.poll();
                         brackets += data.equals("(")|| data.equals("!(")? 1 : data.equals(")")? -1 : 0;
                     }
                 }
@@ -105,11 +111,12 @@ public class SimpleReversePolish {
         Operation.put("!(", new Routine() {
             @Override
             public double[] Evaluate(Pipe pipe, double[] arr) {
-                if(Debug) pipe.Message.Push("Starting IF Statement");
+                if(Debug) pipe.Message.Push("Starting NOT-IF Statement with value : " + arr[0]);
                 if(arr[0] == 0 ){
                     int brackets = 1;
                     while(brackets > 0){
-                        String data = inputs.poll();
+                        String data = pipe.inputs.poll();
+                        System.out.println("------------ Input of NotIf = " + data);
                         brackets += data.equals("(")|| data.equals("!(")? 1 : data.equals(")")? -1 : 0;
                     }
                 }
@@ -126,7 +133,7 @@ public class SimpleReversePolish {
                 return new double[0];
             }
             @Override
-            public String toString(){ return "Ending IfStatement"; }
+            public String toString(){ return "EndOfIfStatement"; }
             @Override
             public int getInputs() { return 0; }
         });
@@ -137,15 +144,15 @@ public class SimpleReversePolish {
                 Queue<String> newInputs = new ArrayDeque<>();
                 boolean Not = false;
                 do{
-                    String next = inputs.peek();
+                    String next = pipe.inputs.peek();
                     curlyBraces += next.equals("{")? 1 : next.equals("}")||next.equals("!}")? -1 : 0;
-                    if(curlyBraces != 0)newInputs.add(inputs.poll());
-                    else Not =inputs.poll().equals("}");
+                    if(curlyBraces != 0)newInputs.add(pipe.inputs.poll());
+                    else Not = pipe.inputs.poll().equals("}");
                 }while(curlyBraces > 0);
                 if(Debug)pipe.Message.Push("Loop Started");
                 double value;
                 do{
-                    value = Calculator(answer, Debug, new ArrayDeque<>(newInputs));
+                    value = Calculator(Debug, new ArrayDeque<>(newInputs));
                     if(Debug)pipe.Message.Push("Loop Run");
                 }while((value != 0) == Not);
                 return new double[0];
@@ -158,7 +165,7 @@ public class SimpleReversePolish {
         Operation.put("$", new Routine() {
             @Override
             public double[] Evaluate(Pipe pipe, double[] arr) {
-                String i = inputs.poll();
+                String i = pipe.inputs.poll();
                 double[] k = new double[i.length()];
                 if(Debug) pipe.Message.Push("String " + i + "Pushed to stack");
                 for(int j = 1;j<=i.length();j++)k[j-1] = i.charAt(i.length()-j);
@@ -172,21 +179,21 @@ public class SimpleReversePolish {
         Operation.put("SUB", new Routine() {
             @Override
             public double[] Evaluate(Pipe pipe, double[] arr) {
-                String name = inputs.poll();
+                String name = pipe.inputs.poll();
                 if(Debug) pipe.Message.Push("Creating New SubRoutine " + name);
                 final Queue<String> SubRoutine = new ArrayDeque<>();
                 String Routine ="";
-                if(inputs.poll().equals("\""))
-                    while(!inputs.peek().equals("\"")){
-                        Routine = Routine.concat(" " + inputs.peek());
-                        SubRoutine.add(inputs.poll());
+                if(pipe.inputs.poll().equals("\""))
+                    while(!pipe.inputs.peek().equals("\"")){
+                        Routine = Routine.concat(" " + pipe.inputs.peek());
+                        SubRoutine.add(pipe.inputs.poll());
                     }
-                if(inputs.poll().equals("\"") && Debug) pipe.Message.Push("Subroutine \" " + Routine + " \" Created Successfully");
+                if(pipe.inputs.poll().equals("\"") && Debug) pipe.Message.Push("Subroutine \" " + Routine + " \" Created Successfully");
                 Operation.put(name, new Routine() {
                     @Override
                     public double[] Evaluate(Pipe pipe, double[] arr) {
                         if(Debug)pipe.Message.Push("Running Subroutine " + name);
-                        return new double[]{Calculator(0,Debug,SubRoutine)};
+                        return new double[]{Calculator(Debug,SubRoutine)};
                     }
                     @Override
                     public String toString(){ return name; }
@@ -310,7 +317,7 @@ public class SimpleReversePolish {
         helloWorldSimple("0 $ World 32 $ Hello { T<- && } S<-T"),
         helloName("0 S-> 32 $ Hello { T<- && } S<-T"),
         primeNumberSearch("2 T<- 0 T<- 3 && && I<- { T-> { && T<- % 0 bin== && && ( X<- X<- && T-> && 0 ) !( 0 ) } && ( X<- 80 C<- && T<- 0 ) !( { T-> && !( T<- 1 ) } ) 0 T<- 1 + && && W I<- 1 }"),
-        passwordHasher("{ 0 S-> { + <-> && } X<- 2 ^ 829 % I<- 1 }"),
+        passwordHasher("{ 0 0 S-> { + <-> && } X<- 2 ^ 829 % I<- 1 }"),
         LoginSystem("-3 300 0 $ USER -2 183 0 $ Elliot -2 297 0 $ ADMIN 0 $ INPUT_USERNAME { T<- && } S<-T S-> { T<- && } T<- { { T-> && T<- bin== ( -1 0 ) && } X<- && -1 bin== && ( X<- 0 S-> { + <-> && } X<- 2 ^ 829 % bin== !( 80 C<- ) 0 0 ) !( { T-> && !( T<- 1 ) } { -2 bin== !} 1 ) }"),
         
         //quadraticFormula_NOTWORKING("<- && T<- <- <-> <- 4 * * ~ T<- && T<- 2 ^ T-> T<- T-> + sqr && T-> ~ && T<- + T-> 2 * && T<- SWAP / -> T-> + T-> SWAP / -> 0"),
@@ -341,11 +348,11 @@ public class SimpleReversePolish {
 
     public Double AdvancedCalculation(Queue<String> Instructions, double answer, boolean Debug, Pipe pipe){
         this.pipe = pipe;
-        return Calculator(answer, Debug, Instructions);
+        initializeOperations(Debug, answer);
+        return Calculator(Debug, Instructions);
     }
 
-    private Double Calculator(double answer, boolean Debug, Queue<String> inputs){
-        initializeOperations(inputs, Debug, answer);
+    private Double Calculator(boolean Debug, Queue<String> inputs){
         try {
             while (!inputs.isEmpty()) try {
                 String temp = inputs.poll();
@@ -362,7 +369,7 @@ public class SimpleReversePolish {
                     }
                     double[] newItems = {};
                     try {
-                        newItems = Op.Evaluate(pipe, items);
+                        newItems = Op.Evaluate(pipe.withInputs(inputs), items);
                     }catch (Exception e){
                         ERROR = "Instruction Evaluation";
                         throw e;
@@ -445,7 +452,7 @@ public class SimpleReversePolish {
                         continue;
                     }}
                 {Queue<String> stringStack = new ArrayDeque<>(Arrays.asList(program.program.split(" ")));
-                    temp = Calculator(answer, DEBUGMODE, stringStack);}
+                    temp = AdvancedCalculation(stringStack, answer, DEBUGMODE, new Pipe());}
                 break;
                 case "D": case "d":
                     DEBUGMODE = !DEBUGMODE;
@@ -453,7 +460,7 @@ public class SimpleReversePolish {
                     break;
                 default:
                 {Queue<String> stringStack = new ArrayDeque<>(Arrays.asList(input.split(" ")));
-                    temp = Calculator(answer, DEBUGMODE, stringStack);}
+                    temp = AdvancedCalculation(stringStack, answer, DEBUGMODE, new Pipe());}
                 break;
             }
             doubleStack = new Stack<>();
