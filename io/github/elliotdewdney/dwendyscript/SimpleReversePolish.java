@@ -1,4 +1,4 @@
-package IDE;
+package io.github.elliotdewdney.dwendyscript;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -48,13 +48,13 @@ public class SimpleReversePolish {
         ServerSocket getSeverSocket() throws IOException;
     }
 
-    interface IntOutput{void Push(int out);}
-    interface DoubleOutput{void Push(Double out);}
-    interface StringOutput{void Push(String out);}
+    public interface IntOutput{void Push(int out);}
+    public interface DoubleOutput{void Push(Double out);}
+    public interface StringOutput{void Push(String out);}
 
-    interface Waiter{void waiter();}
-    interface StringInput{String Poll();}
-    interface DoubleInput{Double Poll();}
+    public interface Waiter{void waiter();}
+    public interface StringInput{String Poll();}
+    public interface DoubleInput{Double Poll();}
 
     interface action{
         String getDefaultSymbol();
@@ -380,7 +380,7 @@ public class SimpleReversePolish {
                     } catch (Exception e) {
                         if (Debug) pipe.Message.Push("Debug - Symbol " + temp + " is not recognised");
                         else pipe.Message.Push("Found unrecognised symbol");
-                        pipe.Message.Push("The Program has encountered a ERROR during RUNTIME");
+                        pipe.Message.Push("The program has encountered a runtime error.");
                         return null;
                     }
                 }
@@ -393,7 +393,7 @@ public class SimpleReversePolish {
                 throw e;
             }
         }catch (Exception e){
-            pipe.Message.Push("The Program has encountered a ERROR during RUNTIME");
+            pipe.Message.Push("The program has encountered a runtime error.");
             if(Debug) e.printStackTrace();
             return null;
         }

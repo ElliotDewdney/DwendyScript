@@ -1,4 +1,4 @@
-package IDE;
+package io.github.elliotdewdney.dwendyscript;
 import javax.swing.*;
 import java.util.Base64;
 
@@ -14,12 +14,14 @@ public class MainMenu {
     }
 
     public static void Show() {
+
         try {
             System.out.println("Setting Look and feel to com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
             UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
         } catch (Exception e) {
             System.out.println("Failed to set LookAndFeel");
         }
+
         JFrame frame = new JFrame("Main Menu");
         try {
             System.out.println();

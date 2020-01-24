@@ -1,6 +1,4 @@
-package IDE;
-
-import jdk.nashorn.internal.runtime.regexp.RegExp;
+package io.github.elliotdewdney.dwendyscript;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,7 +11,6 @@ import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Stack;
-import java.util.regex.Pattern;
 
 public class ProgramOutput extends JDialog {
     public static double answer = 0;

@@ -1,4 +1,4 @@
-package IDE;
+package io.github.elliotdewdney.dwendyscript;
 
 import javax.swing.*;
 import java.awt.event.*;
