@@ -1,0 +1,84 @@
+@import url('https://fonts.googleapis.com/css?family=Cairo|Fira+Code|ZCOOL+QingKe+HuangYou');
+@import 'variables';
+
+body { margin: 0; padding: 0; }
+.menuWrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100vh;
+    width: 100vw;
+    background: linear-gradient(200.88deg, #00BCFE 12.56%, #6F1DBF 93.49%);
+}
+
+#app {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100vh;
+    width: 100vw;
+}
+
+* {
+    font-family: 'Cairo', sans-serif;
+}
+
+.logo {
+    font-family: 'ZCOOL QingKe HuangYou', monospace;
+}
+
+.editor {
+    font-family: 'Fira Code', monospace;
+}
+
+.btn {
+    display: inline-block;
+    border-radius: 6px;
+    text-decoration: none;
+    color: $themeColor;
+    border: 2px solid $themeColor;
+    transition: all 0.2s ease-in-out;
+    padding: 0px 12px;
+    margin: 0;
+
+    &.light {
+        color: $gradientThemeColor;
+        border: 2px solid $gradientThemeColor;
+    }
+
+    &:hover {
+        color: white;
+        background-color: $themeColor;
+    }
+
+    &.light:hover {
+        color: $themeColor;
+        background-color: $gradientThemeColor;
+    }
+}
+
+nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    background: linear-gradient(200.88deg, #00BCFE 12.56%, #6F1DBF 93.49%);
+
+    a:first-child {
+        position: absolute;
+        top: 50%;
+        transform: translate(0, -50%);
+        margin-left: 20px;
+        text-decoration: none;
+        color: $gradientThemeColor;
+    }
+
+    & + * {
+        margin-top: 50px;
+    }
+}
