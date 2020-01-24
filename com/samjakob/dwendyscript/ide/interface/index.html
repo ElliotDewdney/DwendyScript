@@ -81,17 +81,17 @@
                 <div class="content">
                     <pre style="flex-grow: 2" ref="editor" class="editor" contenteditable="true" @input="updateProgramCode"></pre>
                     <p style="display: flex">
-                        <select style="flex-grow: 2; margin-right: 10px">
-                            <!-- For testing -->
-                            <option>Pythagoras</option>
+                        <select v-model="state.sampleProgram" style="flex-grow: 2; margin-right: 10px">
+                            <option value="" selected disabled hidden>Select a program...</option>
+                            <option v-for="(program, id) in samplePrograms">{{ program }}</option>
                         </select>
-                        <a class="btn" href="#" @click.prevent="load">Load Program</a>
+                        <a class="btn" href="#" @click.prevent="loadSampleProgram">Load Sample Program</a>
                     </p>
                 </div>
 
                 <div class="execute">
                     <p><a class="btn" href="#" @click.prevent="execute">Run Program</a></p>
-                    <pre style="flex-grow: 2">{{ project.output }}</pre>
+                    <div class="output" style="flex-grow: 2; white-space: pre-wrap" v-html="project.output"></div>
                     <input type="text" placeholder="Program Input">
                 </div>
             </div>
@@ -115,9 +115,14 @@
                     stage: 0,
 
                     debug: false,
+                    samplePrograms: [],
                     project: {
                         code: "",
                         output: ""
+                    },
+
+                    state: {
+                        sampleProgram: null
                     }
                 },
 
@@ -129,7 +134,15 @@
                     },
 
                     newProject () {
+                        this.samplePrograms = JSON.parse(atob(window.runtimeBridge.getSamplePrograms()));
                         this.stage = 1;
+                    },
+
+                    loadSampleProgram () {
+                        if(!this.state.sampleProgram) return;
+
+                        this.project.code = window.runtimeBridge.loadSampleProgram(this.state.sampleProgram);
+                        this.$refs.editor.textContent = this.project.code;
                     },
 
                     execute () {
@@ -144,17 +157,34 @@
 
                 mounted () {
                     let vm = this;
-                    window.document.body.classList.add('active');
+
+                    Application.addOutput = (output, style) => {
+                        if(vm.project.output.trim().length !== 0) vm.project.output += "\n";
+
+                        if(!style) {
+                            vm.project.output += `${output}`;
+                            return;
+                        }
+
+                        vm.project.output += `<span style="color: ${style}">${output}</span>`;
+                    };
 
                     Application.terminate = (answer) => {
-                        if(vm.project.output.trim().length > 0) vm.project.output += "\n";
-                        vm.project.output += `Result: ${answer}`;
+                        if(answer !== 0) {
+                            if (vm.project.output.trim().length > 0) vm.project.output += "\n";
+                            vm.project.output += `Result: ${answer}`;
+                        }
+
+                        if (vm.project.output.trim().length > 0) vm.project.output += "\n\n";
+                        vm.project.output += `-----------------\nEnd of execution.`
                     };
 
                     document.addEventListener('keydown', (event) => {
                         // Command + R -> reload application.
                         if(event.metaKey && event.which === 82) this.reloadApplication();
-                    })
+                    });
+
+                    window.document.body.classList.add('active');
                 }
             });
         </script>
