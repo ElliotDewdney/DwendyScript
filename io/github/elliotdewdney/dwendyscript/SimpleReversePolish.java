@@ -85,8 +85,8 @@ public class SimpleReversePolish {
         Operation.put("(", new Routine() {
             @Override
             public double[] Evaluate(Pipe pipe, double[] arr) {
-                if(Debug) pipe.Message.Push("Starting IF Statement");
-                if(doubleStack.pop() != 0 ){
+                if(Debug) pipe.Message.Push("Starting IF Statement with value : " + doubleStack.pop());
+                if(arr[0] != 0 ){
                     int brackets = 1;
                     while(brackets > 0){
                         String data = inputs.poll();
@@ -95,22 +95,18 @@ public class SimpleReversePolish {
                 }
                 return new double[0];
             }
-
             @Override
             public String toString(){
                 return "IfStatement";
             }
-
             @Override
-            public int getInputs() {
-                return 1;
-            }
+            public int getInputs() { return 1; }
         });
         Operation.put("!(", new Routine() {
             @Override
             public double[] Evaluate(Pipe pipe, double[] arr) {
                 if(Debug) pipe.Message.Push("Starting IF Statement");
-                if(doubleStack.pop() == 0 ){
+                if(arr[0] == 0 ){
                     int brackets = 1;
                     while(brackets > 0){
                         String data = inputs.poll();
@@ -119,16 +115,20 @@ public class SimpleReversePolish {
                 }
                 return new double[0];
             }
-
             @Override
-            public String toString(){
-                return "NotIfStatement";
-            }
-
+            public String toString(){ return "NotIfStatement"; }
             @Override
-            public int getInputs() {
-                return 1;
+            public int getInputs() { return 1; }
+        });
+        Operation.put(")", new Routine() {
+            @Override
+            public double[] Evaluate(Pipe pipe, double[] arr) {
+                return new double[0];
             }
+            @Override
+            public String toString(){ return "Ending IfStatement"; }
+            @Override
+            public int getInputs() { return 0; }
         });
         Operation.put("{", new Routine() {
             @Override
@@ -151,13 +151,9 @@ public class SimpleReversePolish {
                 return new double[0];
             }
             @Override
-            public String toString(){
-                return "LoopStart";
-            }
+            public String toString(){ return "LoopStart"; }
             @Override
-            public int getInputs() {
-                return 0;
-            }
+            public int getInputs() { return 0; }
         });
         Operation.put("$", new Routine() {
             @Override
@@ -168,16 +164,10 @@ public class SimpleReversePolish {
                 for(int j = 1;j<=i.length();j++)k[j-1] = i.charAt(i.length()-j);
                 return k;
             }
-
             @Override
-            public String toString(){
-                return "StringIndicator";
-            }
-
+            public String toString(){ return "StringIndicator"; }
             @Override
-            public int getInputs() {
-                return 0;
-            }
+            public int getInputs() { return 0; }
         });
         Operation.put("SUB", new Routine() {
             @Override
@@ -198,29 +188,18 @@ public class SimpleReversePolish {
                         if(Debug)pipe.Message.Push("Running Subroutine " + name);
                         return new double[]{Calculator(0,Debug,SubRoutine)};
                     }
-
                     @Override
-                    public String toString(){
-                        return name;
-                    }
-
+                    public String toString(){ return name; }
                     @Override
-                    public int getInputs() {
-                        return 0;
-                    }
+                    public int getInputs() { return 0; }
                 });
                 return new double[0];
             }
+            @Override
+            public String toString(){ return "CreateSubroutine"; }
 
             @Override
-            public String toString(){
-                return "CreateSubroutine";
-            }
-
-            @Override
-            public int getInputs() {
-                return 0;
-            }
+            public int getInputs() { return 0; }
         });
 
     }
@@ -370,6 +349,7 @@ public class SimpleReversePolish {
         try {
             while (!inputs.isEmpty()) try {
                 String temp = inputs.poll();
+                System.out.println("Current Output : " + temp);
                 if (Operation.containsKey(temp)) {
                     Routine Op = Operation.get(temp);
                     if(Debug)pipe.Message.Push("Performing Operation \"" + Op + "\"");
@@ -403,7 +383,6 @@ public class SimpleReversePolish {
                         pipe.Message.Push("The Program has encountered a ERROR during RUNTIME");
                         return null;
                     }
-                    break;
                 }
             }catch (Exception e){
                 if(Debug){
